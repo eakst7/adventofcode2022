@@ -3,7 +3,9 @@ use std::path::Path;
 use std::io::BufReader;
 use std::io::BufRead;
 
-#[derive(Debug)]
+use memoize::memoize;
+
+#[derive(Copy,Clone,Debug,PartialEq,Eq,Hash)]
 enum RPS {
     Rock, Paper, Scissors
 }
@@ -19,7 +21,7 @@ impl RPS {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy,Clone,Debug,PartialEq,Eq,Hash)]
 enum Outcome {
     Win, Lose, Draw
 }
@@ -43,7 +45,8 @@ impl Outcome {
     }
 }
 
-fn resolve(p1: &RPS, p2: &RPS) -> Outcome {
+#[memoize]
+fn resolve(p1: RPS, p2: RPS) -> Outcome {
     match p1 {
         RPS::Rock => {
             match p2 {
@@ -69,7 +72,8 @@ fn resolve(p1: &RPS, p2: &RPS) -> Outcome {
     }
 }
 
-fn resolve_my_play(outcome: &Outcome, opponent: &RPS) -> RPS {
+#[memoize]
+fn resolve_my_play(outcome: Outcome, opponent: RPS) -> RPS {
     match opponent {
         RPS::Rock => {
             match outcome {
@@ -113,7 +117,7 @@ fn part1() {
         let opp = RPS::of(opp);
         let me = RPS::of(me);
 
-        let outcome = resolve(&me, &opp);
+        let outcome = resolve(me, opp);
 
         let mut score = outcome.score();
         score += match &me {
@@ -141,7 +145,7 @@ fn part2() {
         let opp = RPS::of(opp);
         let outcome = Outcome::of(me);
 
-        let me = resolve_my_play(&outcome, &opp);
+        let me = resolve_my_play(outcome, opp);
 
         let mut score = outcome.score();
         score += match &me {
@@ -158,5 +162,6 @@ fn part2() {
 }
 
 fn main() {
+    part1();
     part2();
 }
